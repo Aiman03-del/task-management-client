@@ -1,22 +1,21 @@
-import ActivityLog from "./ActivityLog";
+
 import TaskBoard from "./TaskBoard";
-import AddTask from "./AddTask";
+import Sidebar from "../../components/shared/Sidebar";
 
 const Dashboard = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Task Management</h1>
+        <div className="flex flex-1 pt-24">
+        {/* Sidebar */}
+        <Sidebar />
 
-      <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
-        <AddTask  />
+        {/* Main Content */}
+        <div className="flex-1">
+        <TaskBoard />
+        </div>
       </div>
-
-      <TaskBoard />
-
-      <div className="mt-6 p-4 bg-gray-200 dark:bg-gray-900 rounded-lg shadow-md">
-        <ActivityLog />
-      </div>
+    
     </div>
   );
 };

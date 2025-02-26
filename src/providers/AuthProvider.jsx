@@ -75,22 +75,8 @@ const AuthProvider = ({ children }) => {
         }
       } else {
         setUser(currentUser);
-        const apiUrl = import.meta.env.VITE_API_URL;
-        if (!apiUrl) {
-          console.error("VITE_API_URL is not defined");
-          setLoading(false);
-          return;
-        }
-
-        try {
-          await axios.get(`${apiUrl}/logout`, {
-            withCredentials: true,
-          });
-          localStorage.removeItem("token");
-          console.log("Token removed from localStorage");
-        } catch (error) {
-          console.error("Error during logout:", error);
-        }
+        localStorage.removeItem("token");
+        console.log("Token removed from localStorage");
       }
       setLoading(false);
     });

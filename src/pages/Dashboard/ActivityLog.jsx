@@ -8,11 +8,21 @@ const ActivityLog = () => {
   const [isAscending, setIsAscending] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/activities")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchActivities = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/activities", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const data = await response.json();
         setLogs(data);
-      });
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+      }
+    };
+
+    fetchActivities();
 
     socket.on("activityChange", (change) => {
       if (change.operationType === "insert") {

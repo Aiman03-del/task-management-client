@@ -8,12 +8,9 @@ const Navbar = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { user,  } = useContext(AuthContext);
 
-  const today = new Date().toLocaleDateString('en-US', {
-    day: 'numeric',
-    weekday: 'long',
-    month: 'long',
-    year: 'numeric'
-  });
+  const today = new Date();
+  const day = today.toLocaleDateString('en-US', { day: 'numeric', weekday: 'long' });
+  const monthYear = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <nav>
@@ -23,10 +20,13 @@ const Navbar = () => {
             <img className="h-10 w-auto" alt="toDoList" src={toDoList} />
           </div>
           <div className="flex items-center space-x-4">
-            <button onClick={() => setCalendarOpen(!calendarOpen)} className="text-white">{today}</button>
+            <button onClick={() => setCalendarOpen(!calendarOpen)} className="text-white">
+              <div>{day}</div>
+              <div>{monthYear}</div>
+            </button>
             {user ? (
               <>
-                <img className="h-8 w-8 rounded-full" src={user.photoURL} alt={user.displayName} />
+                <img className="h-12 w-12 rounded-full" src={user.photoURL} alt={user.displayName} />
                 <div className="flex flex-col items-start">
                   <span className="text-white">{user.displayName}</span>
                   <span className="text-white text-xs">{user.email}</span>
@@ -36,7 +36,7 @@ const Navbar = () => {
           </div>
         </div>
         {calendarOpen && (
-          <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-md py-1 shadow-lg ring-1 ring-black/5">
+          <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-md py-1 shadow-lg ring-1 ring-black/5 bg-white text-black">
             <Calendar />
           </div>
         )}
