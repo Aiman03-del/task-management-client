@@ -1,85 +1,79 @@
-import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import { useState } from "react";
 import { auth } from "../../config/firebase.config";
+import { useTasks } from "../../hooks/useTasks";
 
-const AddTask = ({ addTask }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("To-Do");
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setUserName(user.displayName);
-      setUserEmail(user.email);
-    }
-  }, []);
+const AddTask = () => {
+  const user = auth.currentUser;
+  const { addTask } = useTasks(user?.email);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('To-Do');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return alert("Title is required!");
-
-    const newTask = {
+    if (title.length > 50) {
+      alert("Title should not exceed 50 characters");
+      return;
+    }
+    if (description.length > 200) {
+      alert("Description should not exceed 200 characters");
+      return;
+    }
+    const task = {
       title,
       description,
       category,
-      userName,
-      userEmail,
-      timestamp: new Date().toISOString(),
     };
-
-    addTask(newTask); 
-    setTitle(""); setDescription(""); setCategory("To-Do");
+    await addTask(task);
+    setTitle('');
+    setDescription('');
+    setCategory('To-Do');
   };
 
   return (
-    <div className="p-4 rounded-lg shadow">
-      <h2 className="text-lg font-bold mb-3">Add New Task</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Task Title"
-          maxLength={50}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full  p-2 rounded mb-2"
-        />
-        <textarea
-          placeholder="Task Description"
-          maxLength={200}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full  p-2 rounded mb-2"
-        />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full  p-2 rounded mb-2 bg-black text-white">
-          <option value="To-Do">To-Do</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Done">Done</option>
-        </select>
-        <input
-          type="text"
-          value={userName}
-          readOnly
-          className="w-full  p-2 rounded mb-2 "
-        />
-        <input
-          type="email"
-          value={userEmail}
-          readOnly
-          className="w-full  p-2 rounded mb-2 "
-        />
-        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-          Add Task
-        </button>
+    <div className="container mx-auto p-4">
+      <form onSubmit={handleSubmit} className="shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className="mb-4">
+          <label className="block  text-sm font-bold mb-2">Email:</label>
+          <input type="email" value={user.email} readOnly className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline" />
+        </div>
+        <div className="mb-4">
+          <label className="block  text-sm font-bold mb-2">Name:</label>
+          <input type="text" value={user.displayName} readOnly className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline" />
+        </div>
+        <div className="mb-4">
+          <label className="block  text-sm font-bold mb-2">Title:</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength="50"
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block  text-sm font-bold mb-2">Description:</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength="200"
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block  text-sm font-bold mb-2">Category:</label>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="bg-gray-900 text-white shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline">
+            <option value="To-Do">To-Do</option>
+            <option value="In-Progress">In Progress</option>
+            <option value="Done">Done</option>
+          </select>
+        </div>
+        <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Task</button>
       </form>
     </div>
   );
-};
-
-AddTask.propTypes = {
-  addTask: PropTypes.func.isRequired,
 };
 
 export default AddTask;

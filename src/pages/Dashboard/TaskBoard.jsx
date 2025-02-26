@@ -1,42 +1,40 @@
-import { DndContext, closestCorners } from "@dnd-kit/core";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import TaskColumn from "./TaskColumn";
-import useTasks from "../../hooks/useTasks";
-import { useEffect, useState } from "react";
-import io from "socket.io-client";
+import { useTasks } from "../../hooks/useTasks";
+import { auth } from "../../config/firebase.config";
 
 const TaskBoard = () => {
-  const { tasks, updateTask } = useTasks();
-  const [socket] = useState(() => io("http://localhost:5000"));
+  const user = auth.currentUser;
+  const { tasks, updateTaskCategory } = useTasks(user?.email);
 
-  useEffect(() => {
-    socket.on("activityChange", (newActivity) => {
-      console.log("New activity received:", newActivity);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket]);
+  const categorizedTasks = {
+    "To-Do": tasks.filter((task) => task.category === "To-Do"),
+    "In Progress": tasks.filter((task) => task.category === "In Progress"),
+    "Done": tasks.filter((task) => task.category === "Done"),
+  };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
+
     if (!over) return;
 
-    const draggedTask = tasks.find((task) => task._id === active.id);
-    if (!draggedTask || draggedTask.category === over.id) return;
+    const activeTask = tasks.find((task) => task._id === active.id);
+    const newCategory = over.id;
 
-    updateTask(active.id, { category: over.id });
+    if (activeTask && activeTask.category !== newCategory) {
+      updateTaskCategory(activeTask._id, newCategory);
+    }
   };
 
   return (
-    <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-3 gap-4 p-4">
-        {["To-Do", "In Progress", "Done"].map((category) => {
-          const filteredTasks = tasks.filter((task) => task.category === category);
-          return (
-            <TaskColumn key={category} id={category} title={category} tasks={filteredTasks} />
-          );
-        })}
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div className="flex flex-wrap -mx-4">
+        {Object.entries(categorizedTasks).map(([category, tasks]) => (
+          <SortableContext key={category} items={tasks} strategy={verticalListSortingStrategy}>
+            <TaskColumn category={category} tasks={tasks} />
+          </SortableContext>
+        ))}
       </div>
     </DndContext>
   );

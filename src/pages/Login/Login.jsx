@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
-import { auth, provider } from "../../config/firebase.config";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../config/firebase.config";
+import { AuthContext } from "../../providers/AuthProvider";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signInWithGoogle } = useContext(AuthContext);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -18,7 +20,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithGoogle();
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
